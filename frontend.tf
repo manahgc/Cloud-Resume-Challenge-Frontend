@@ -61,6 +61,18 @@ resource "aws_s3_bucket_versioning" "website_bucket_versioning" {
   }
 }
 
+resource "aws_s3_bucket_cors_configuration" "s3_website_cors_config" {
+  bucket = aws_s3_bucket.website_bucket.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["PUT", "GET"]
+    allowed_origins = ["charlesmanah.com", "www.charlesmanah.com"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
 #-----------------------------------------------------------
 # Website Access logging
 #----------------------------------------------------------
@@ -102,42 +114,12 @@ resource "aws_s3_bucket_logging" "website_bucket_logging" {
   target_prefix = "log/"
 }
 
-# resource "aws_s3_bucket_cors_configuration" "s3_website_cors_config" {
-#   bucket = aws_s3_bucket.website_bucket.id
-
-#   cors_rule {
-#     allowed_headers = ["*"]
-#     allowed_methods = ["PUT", "POST"]
-#     allowed_origins = ["charlesmanah.com"]
-#     expose_headers  = ["ETag"]
-#     max_age_seconds = 3000
-#   }
-
-#   cors_rule {
-#     allowed_methods = ["GET"]
-#     allowed_origins = ["*"]
-#   }
-# }
 
 #-------------------------------------------------------------
 #Website Bucket Server Side Encryption
 #-------------------------------------------------------------
 
-resource "aws_kms_key" "website_bucket_key" {
-  description = "This key is used to encrypt bucket objects"
-  deletion_window_in_days = 10
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "website_bucket_serverside_encryption" {
-  bucket = aws_s3_bucket.website_bucket.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      kms_master_key_id = aws_kms_key.website_bucket_key.arn
-      sse_algorithm     = "aws:kms"
-    }
-  }
-}
+#AWS Server Side Encryption, S3 Managed Keys is default
 
 #--------------------------------------------------------------
 # WEBSITE CONFIGURATION
@@ -179,12 +161,13 @@ resource "aws_cloudfront_distribution" "s3_website_distribution" {
 
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = "Some comment"
+  comment             = "cloud resume challenge wesbite distribution"
   default_root_object = "index.html"
+ 
 
   logging_config {
     include_cookies = false
-    bucket          = "cloudresume-access-log-1234.s3.amazonaws.com"
+    bucket          = var.access_log_bucket_domain_name
     prefix          = "s3website"
   }
 
@@ -202,57 +185,12 @@ resource "aws_cloudfront_distribution" "s3_website_distribution" {
         forward = "none"
       }
     }
-
-    viewer_protocol_policy = "allow-all"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+  viewer_protocol_policy = "redirect-to-https"
+  min_ttl = 0
+  default_ttl = 60
+  max_ttl = 60
   }
-
-  # Cache behavior with precedence 0
-  ordered_cache_behavior {
-    path_pattern     = "/content/immutable/*"
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id = var.s3_origin_id
-    forwarded_values {
-      query_string = false
-      headers      = ["Origin"]
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    min_ttl                = 0
-    default_ttl            = 86400
-    max_ttl                = 31536000
-    compress               = true
-    viewer_protocol_policy = "redirect-to-https"
-  }
-
-  # Cache behavior with precedence 1
-  ordered_cache_behavior {
-    path_pattern     = "/content/*"
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = var.s3_origin_id
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
-    compress               = true
-    viewer_protocol_policy = "redirect-to-https"
-  }
-
+ 
   price_class = "PriceClass_200"
 
   restrictions {
@@ -273,14 +211,24 @@ resource "aws_cloudfront_distribution" "s3_website_distribution" {
 #-------------------------------------------------------
 # Domain Configuration
 #-------------------------------------------------------
-resource "aws_route53_zone" "primary" {
-  name = var.domain_name
-}
 
 resource "aws_route53_record" "website_cloudfront_record" {
   provider = aws
-  zone_id = aws_route53_zone.primary.zone_id
+  zone_id = var.hosted_zone_id
   name    = var.domain_name
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.s3_website_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.s3_website_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "website_cloudfront_record2" {
+  provider = aws
+  zone_id = var.hosted_zone_id
+  name    = "www.${var.domain_name}"
   type    = "A"
 
   alias {
@@ -295,7 +243,7 @@ resource "aws_route53_record" "website_cloudfront_record" {
 #--------------------------------------------------------------
 
 resource "aws_acm_certificate" "s3_website_cert" {
-  domain_name       = "charlesmanah.com"
+  domain_name       = var.domain_name
   validation_method = "DNS"
 
   lifecycle {
@@ -304,7 +252,7 @@ resource "aws_acm_certificate" "s3_website_cert" {
 }
 
 data "aws_route53_zone" "primary" {
-  name = aws_route53_zone.primary.name
+  zone_id = var.hosted_zone_id
   private_zone = false
 }
 
@@ -330,7 +278,3 @@ resource "aws_acm_certificate_validation" "s3_website_cert_validation" {
   certificate_arn         = aws_acm_certificate.s3_website_cert.arn
   validation_record_fqdns = [for record in aws_route53_record.domain_validation : record.fqdn]
 }
-
-# resource "aws_lb_listener" "example" {
-#   certificate_arn = aws_acm_certificate_validation.example.certificate_arn
-# }
