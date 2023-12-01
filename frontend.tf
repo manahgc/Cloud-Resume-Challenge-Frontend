@@ -171,7 +171,7 @@ resource "aws_cloudfront_distribution" "s3_website_distribution" {
     prefix          = "s3website"
   }
 
-  aliases = ["charlesmanah.com"]
+  aliases = ["charlesmanah.com", "www.charlesmanah.com"]
 
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
@@ -230,13 +230,15 @@ resource "aws_route53_record" "website_cloudfront_record2" {
   zone_id = var.hosted_zone_id
   name    = "www.${var.domain_name}"
   type    = "CNAME"
-
-  alias {
-    name                   = aws_cloudfront_distribution.s3_website_distribution.domain_name
-    zone_id                = aws_cloudfront_distribution.s3_website_distribution.hosted_zone_id
-    evaluate_target_health = false
+  ttl = 300
+  records = ["${var.domain_name}"]
   }
-}
+  # # alias {
+  # #   name                   = aws_cloudfront_distribution.s3_website_distribution.domain_name
+  # #   zone_id                = aws_cloudfront_distribution.s3_website_distribution.hosted_zone_id
+  # #   evaluate_target_health = false
+  # }
+
 
 #--------------------------------------------------------------
 # Amazon Certificate Manager (ACM)
