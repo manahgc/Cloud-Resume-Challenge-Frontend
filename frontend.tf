@@ -229,7 +229,7 @@ resource "aws_route53_record" "website_cloudfront_record2" {
   provider = aws
   zone_id = var.hosted_zone_id
   name    = "www.${var.domain_name}"
-  type    = "A"
+  type    = "CNAME"
 
   alias {
     name                   = aws_cloudfront_distribution.s3_website_distribution.domain_name
@@ -244,6 +244,7 @@ resource "aws_route53_record" "website_cloudfront_record2" {
 
 resource "aws_acm_certificate" "s3_website_cert" {
   domain_name       = var.domain_name
+  subject_alternative_names = ["www.${var.domain_name}"]
   validation_method = "DNS"
 
   lifecycle {
