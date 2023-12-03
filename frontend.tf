@@ -29,7 +29,9 @@ resource "aws_s3_bucket_policy" "website_bucket_policy" {
       {
         "Sid": "PublicReadGetObject",
         "Effect": "Allow",
-        "Principal": "*",
+        "Principal": {
+          "Aws": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${aws_cloudfront_origin_access_identity.s3_website_OAI.id}"
+        },
         "Action": "s3:GetObject",
         "Resource": "arn:aws:s3:::${var.bucket_name}/*"
       }
@@ -157,6 +159,11 @@ resource "aws_cloudfront_distribution" "s3_website_distribution" {
     domain_name              = aws_s3_bucket.website_bucket.bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.s3_website_OAC.id
     origin_id                = var.s3_origin_id
+
+    # s3_origin_config {
+    #   origin_access_identity = aws_cloudfront_origin_access_identity.s3_website_OAI.cloudfront_access_identity_path
+      
+    # }
   }
 
   enabled             = true

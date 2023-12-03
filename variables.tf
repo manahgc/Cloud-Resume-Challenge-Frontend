@@ -35,3 +35,8 @@ variable "access_log_bucket_domain_name" {
     type = string
     description = "Access log bucket domain name"
 }
+
+variable "oai_id" {
+    type = string
+    description = "origin access identity id"
+}
