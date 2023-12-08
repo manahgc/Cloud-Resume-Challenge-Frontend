@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const data = await response.json();
     const count = data.views;
     const countElement = document.getElementById('views');
-    countElement.innerText = count; 
+    countElement.innerText = count;  
   }
 
   getCurrentCount();
