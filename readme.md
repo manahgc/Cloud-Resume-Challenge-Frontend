@@ -2,7 +2,7 @@ Cloud Resume Challenge - https://cloudresumechallenge.dev/docs/the-challenge/aws
 
 Build and deploy an cloud resume on aws infrastrcuture, employing DevOps practices.
 
-<img src="images/archtecture.png" alt="Architecture Diagram" width="100%" height="100">
+<img src="images/archtecture.png" alt="Architecture Diagram">
 
 **Services:**
 Route53
