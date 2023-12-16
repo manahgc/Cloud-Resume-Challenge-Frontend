@@ -2,9 +2,9 @@ Cloud Resume Challenge - https://cloudresumechallenge.dev/docs/the-challenge/aws
 
 Build and deploy an cloud resume on aws infrastrcuture, employing DevOps practices.
 
-[Architecture Diagram](images/archtecture.png)
+<img src="images/archtecture.png" alt="Architecture Diagram" width="100%" height="100">
 
-Services:
+**Services:**
 Route53
 Cloudfront
 ACM
@@ -14,12 +14,13 @@ Lambda
 SES
 DynamoDB
 
-Website:
+**Website:**
 HTML
 CSS
 Java Script
+template - https://themewagon.com/themes/free-one-page-bootstrap-4-html5-personal-portfolio-website-template-clark/
 
-Lambda:
+**Lambda:**
 Python
 
 
