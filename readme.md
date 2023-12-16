@@ -1,26 +1,35 @@
 Cloud Resume Challenge - https://cloudresumechallenge.dev/docs/the-challenge/aws/  by Forrest Brazeal.
 
-Build and deploy an cloud resume on aws infrastrcuture, employing DevOps practices.
+Build and launch online resume in the cloud using AWS, incorporating DevOps methods for efficient development and deployment.
 
 <img src="images/archtecture.png" alt="Architecture Diagram">
 
-**Services:**
-Route53
-Cloudfront
-ACM
-S3
-API Gateway
-Lambda 
-SES
-DynamoDB
+**AWS Services:**
+- Route53
+- Cloudfront
+- ACM
+- S3
+- API Gateway
+- Lambda 
+- SES
+- DynamoDB
 
 **Website:**
-HTML
-CSS
-Java Script
-template - https://themewagon.com/themes/free-one-page-bootstrap-4-html5-personal-portfolio-website-template-clark/
+- HTML
+- CSS
+- Java Script
+- template - https://themewagon.com/themes/free-one-page-bootstrap-4-html5-personal-portfolio-website-template-clark/
 
 **Lambda:**
-Python
+- Python
+
+**Version Control**
+- Github
+
+**CI/CD**
+- Github Actions Workflows
+
+**IaC**
+- Terraform
 
 
